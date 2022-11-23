@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -49,6 +51,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  bool isReversed = false;
+  final List<UniqueKey> _buttonKeys = [UniqueKey(), UniqueKey()];
 
   void _incrementCounter() {
     setState(() {
@@ -67,6 +71,19 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _resetCounter() {
+    setState(() {
+      _counter = 0;
+      _swap();
+    });
+  }
+
+  void _swap() {
+    setState(() {
+      isReversed = !isReversed;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -75,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -101,6 +119,12 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.only(bottom: 12.0),
+              child:
+                  const Image(image: AssetImage('assets/images/download.png')),
+            ),
             const Text(
               'You have pushed the button this many times:',
             ),
@@ -109,18 +133,73 @@ class _MyHomePageState extends State<MyHomePage> {
               //  Receives context == ref. to the neareast parent in the tree with type theme in the widget tree
               style: Theme.of(context).textTheme.headline4,
             ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: _decrementCounter,
-                child: const Text("Decrement Counter"))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FancyButton(
+                    onPressed: _incrementCounter,
+                    child: const Text(
+                      '+',
+                      style: TextStyle(color: Colors.white),
+                    )),
+                const SizedBox(
+                  width: 20,
+                ),
+                FancyButton(
+                    onPressed: _decrementCounter,
+                    child: const Text(
+                      '-',
+                      style: TextStyle(color: Colors.white),
+                    )),
+                const SizedBox(
+                  width: 20,
+                ),
+              ],
+            )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        onPressed: _resetCounter,
+        tooltip: 'Reset Counter',
+        child: const Icon(Icons.refresh),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+class FancyButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final Widget child;
+  const FancyButton({super.key, required this.onPressed, required this.child});
+
+  @override
+  State<FancyButton> createState() => _FancyButtonState();
+}
+
+class _FancyButtonState extends State<FancyButton> {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: _getColors(),
+      onPressed: widget.onPressed,
+      child: widget.child,
+    );
+  }
+
+  Color _getColors() {
+    return _buttonColors.putIfAbsent(this, () => colors[next(0, 5)]);
+  }
+
+  Map<_FancyButtonState, Color> _buttonColors = {};
+  final _random = Random();
+  int next(int min, int max) => min + _random.nextInt(max - min);
+  List<Color> colors = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.amber,
+    Colors.lightBlue,
+  ];
 }
